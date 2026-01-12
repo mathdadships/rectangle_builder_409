@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rectangle Builder 🔷</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Bangers&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { 
+            height: 100%; 
+            overflow: hidden; 
+            font-family: 'Fredoka', sans-serif; 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            user-select: none;
+        }
+        
+        #app {
+            width: 100%;
+            height: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding: 0 15px;
+            overflow: hidden;
+        }
+
+        /* Header */
+        #header {
+            background: rgba(0,0,0,0.3);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            border-radius: 0 0 15px 15px;
+        }
+
+        #title {
+            font-family: 'Bangers', cursive;
+            font-size: 22px;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+
+        .stat-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-family: 'Bangers', cursive;
+            font-size: 22px;
+            color: #ffd93d;
+        }
+
+        .streak-display {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 5px 12px;
+            border-radius: 8px;
+        }
+
+        .streak-display.hot {
+            background: linear-gradient(135deg, #f39c12, #e74c3c);
+            animation: pulse 0.5s ease infinite alternate;
+        }
+
+        @keyframes pulse {
+            to { transform: scale(1.05); }
+        }
+
+        /* Game area */
+        #game-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 12px 0;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        /* Main card */
+        #main-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #main-card.correct-flash {
+            animation: cardFlash 0.4s ease;
+        }
+
+        @keyframes cardFlash {
+            0%, 100% { box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+            50% { box-shadow: 0 0 30px rgba(46, 213, 115, 0.6); }
+        }
+
+        /* Question prompt */
+        #prompt {
+            font-size: 16px;
+            color: #666;
+            text-align: center;
+        }
+
+        #target-expression {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            background: #ffd93d;
+            padding: 8px 24px;
+            border-radius: 12px;
+        }
+
+        /* Rectangle container */
+        #rectangle-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Top labels row - must match width of rectangle */
+        #top-labels {
+            display: flex;
+            padding-left: 30px; /* Match side label width */
+        }
+
+        .dim-top {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main rectangle wrapper with side label */
+        #rectangle-wrapper {
+            display: flex;
+            align-items: stretch;
+            gap: 6px;
+        }
+
+        /* Side dimension label */
+        #dim-side {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+        }
+
+        /* The rectangle grid */
+        #rectangle-grid {
+            display: flex;
+            border: 3px solid #333;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .rect-section {
+            display: grid;
+            gap: 2px;
+            padding: 4px;
+        }
+
+        .rect-section.left {
+            background: #a8e6cf;
+            border-right: 3px dashed #333;
+        }
+
+        .rect-section.right {
+            background: #ffd3b6;
+        }
+
+        .grid-cell {
+            width: 22px;
+            height: 22px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 3px;
+        }
+
+        /* Equation display below rectangle */
+        #equation-display {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .eq-part {
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+
+        .eq-part.left-part {
+            background: #a8e6cf;
+        }
+
+        .eq-part.right-part {
+            background: #ffd3b6;
+        }
+
+        .eq-op {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .eq-result {
+            background: #ffd93d;
+            padding: 4px 12px;
+            border-radius: 8px;
+        }
+
+        /* Choices */
+        #choices {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            width: 100%;
+        }
+
+        .choice {
+            background: #fff;
+            border-radius: 15px;
+            padding: 16px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: 3px solid transparent;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .choice:hover {
+            transform: scale(1.02);
+            border-color: #667eea;
+        }
+
+        .choice:active {
+            transform: scale(0.98);
+        }
+
+        .choice.correct {
+            background: #00ff88;
+            border-color: #00cc6a;
+            animation: correctPop 0.4s ease;
+        }
+
+        .choice.wrong {
+            background: #ff6b6b;
+            border-color: #ee5253;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes correctPop {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        /* Start screen */
+        #start-screen {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 30px;
+            text-align: center;
+        }
+
+        #start-screen.hidden {
+            display: none;
+        }
+
+        #start-screen h1 {
+            font-family: 'Bangers', cursive;
+            font-size: 48px;
+            color: #fff;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+        }
+
+        #start-screen p {
+            font-size: 18px;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 25px;
+            max-width: 350px;
+        }
+
+        /* Animated demo rectangles */
+        #demo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        #demo-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 0;
+            position: relative;
+        }
+
+        .demo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .demo-section.left-section {
+            animation: slideFromLeft 15s ease-in-out infinite;
+        }
+
+        .demo-section.right-section {
+            animation: slideFromRight 15s ease-in-out infinite;
+        }
+
+        /* Plus sign in the middle - in the equation row */
+        #demo-plus {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffd93d;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            opacity: 0;
+            animation: showPlus 15s ease-in-out infinite;
+        }
+
+        @keyframes showPlus {
+            0%, 30% { opacity: 0; }
+            40%, 97% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Equation labels row */
+        #demo-eq-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .demo-eq-label {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .demo-eq-label.left-eq {
+            animation: slideFromLeft 15s ease-in-out infinite;
+        }
+
+        .demo-eq-label.right-eq {
+            animation: slideFromRight 15s ease-in-out infinite;
+        }
+
+        .demo-dim-top {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .demo-row {
+            display: flex;
+            align-items: center;
+        }
+
+        .demo-dim-side {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-right: 6px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Right side dimension fades out AND collapses when rectangles meet */
+        .demo-dim-fade {
+            animation: fadeOutSide 15s ease-in-out infinite;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        @keyframes fadeOutSide {
+            0%, 13% { opacity: 1; width: 20px; margin-right: 6px; }
+            37%, 100% { opacity: 0; width: 0px; margin-right: 0px; }
+        }
+
+        .demo-rect {
+            display: grid;
+            gap: 3px;
+            padding: 5px;
+            border: 3px solid #333;
+            border-radius: 4px;
+        }
+
+        .demo-rect.left-demo {
+            background: #a8e6cf;
+            grid-template-columns: repeat(2, 1fr);
+            border-right: 3px dashed #333;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .demo-rect.right-demo {
+            background: #ffd3b6;
+            grid-template-columns: repeat(4, 1fr);
+            border-left: none;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .demo-cell {
+            width: 20px;
+            height: 20px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 3px;
+        }
+
+        /* 2 seconds pause, then 8 seconds animation, then 5 seconds hold */
+        @keyframes slideFromLeft {
+            0%, 13% { transform: translateX(-60px); }
+            40%, 100% { transform: translateX(0); }
+        }
+
+        @keyframes slideFromRight {
+            0%, 13% { transform: translateX(60px); }
+            40%, 100% { transform: translateX(0); }
+        }
+
+        /* Final equation that appears when rectangles meet */
+        #demo-equation {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffd93d;
+            margin-top: 15px;
+            opacity: 0;
+            animation: fadeInEquation 15s ease-in-out infinite;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            background: rgba(0,0,0,0.25);
+            padding: 8px 16px;
+            border-radius: 10px;
+        }
+
+        @keyframes fadeInEquation {
+            0%, 40% { opacity: 0; transform: translateY(-10px) scale(0.9); }
+            47%, 97% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-10px) scale(0.9); }
+        }
+
+        #start-btn {
+            background: #ffd93d;
+            color: #333;
+            font-family: 'Bangers', cursive;
+            font-size: 28px;
+            padding: 15px 50px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        #start-btn:hover {
+            transform: scale(1.05);
+        }
+
+        #start-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Complete popup */
+        #complete-popup {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        #complete-popup.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #complete-content {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 40px;
+            border-radius: 25px;
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.3s;
+        }
+
+        #complete-popup.show #complete-content {
+            transform: scale(1);
+        }
+
+        #complete-emoji {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+
+        #complete-text {
+            font-family: 'Bangers', cursive;
+            font-size: 36px;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        #fox-message {
+            font-size: 18px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        /* Flying emojis */
+        .flying-emoji {
+            position: fixed;
+            font-size: 30px;
+            pointer-events: none;
+            animation: flyUp 0.7s ease-out forwards;
+            z-index: 300;
+        }
+
+        @keyframes flyUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.5); }
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            top: -10px;
+            animation: confettiFall 2s ease-out forwards;
+            z-index: 300;
+            pointer-events: none;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ===== CORRECT POPUP ===== */
+        #correct-popup {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        #correct-popup.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #correct-popup-content {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            padding: 30px 40px;
+            border-radius: 25px;
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.3s;
+            max-width: 400px;
+        }
+
+        #correct-popup.show #correct-popup-content {
+            transform: scale(1);
+        }
+
+        #correct-popup-content.streak-3 {
+            background: linear-gradient(135deg, #f39c12, #e74c3c);
+        }
+
+        #correct-popup-content.streak-5 {
+            background: linear-gradient(135deg, #9b59b6, #e74c3c);
+            animation: streakPulse 0.3s ease infinite alternate;
+        }
+
+        #correct-popup-content.streak-10 {
+            background: linear-gradient(135deg, #f39c12, #e74c3c, #9b59b6, #3498db);
+            background-size: 300% 300%;
+            animation: rainbowBg 1s ease infinite;
+        }
+
+        @keyframes streakPulse {
+            to { transform: scale(1.02); }
+        }
+
+        @keyframes rainbowBg {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        #correct-popup-emoji {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        #correct-popup-text {
+            font-family: 'Bangers', cursive;
+            font-size: 36px;
+            color: #fff;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        #correct-popup-subtext {
+            font-size: 18px;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 15px;
+        }
+
+        #correct-visual-explanation {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+        }
+
+        #correct-next-btn {
+            background: #fff;
+            color: #333;
+            font-family: 'Bangers', cursive;
+            font-size: 22px;
+            padding: 12px 40px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        #correct-next-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* ===== WRONG POPUP ===== */
+        #wrong-popup {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        #wrong-popup.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #wrong-popup-content {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            padding: 25px 30px;
+            border-radius: 25px;
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.3s;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        #wrong-popup.show #wrong-popup-content {
+            transform: scale(1);
+        }
+
+        #wrong-popup-emoji {
+            font-size: 50px;
+            margin-bottom: 8px;
+            animation: emojiShake 0.5s ease infinite alternate;
+        }
+
+        @keyframes emojiShake {
+            from { transform: rotate(-10deg); }
+            to { transform: rotate(10deg); }
+        }
+
+        #wrong-popup-text {
+            font-family: 'Bangers', cursive;
+            font-size: 32px;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        #wrong-popup-subtext {
+            font-size: 16px;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 15px;
+        }
+
+        /* Visual explanation with mini rectangles */
+        #visual-explanation {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        #visual-explanation h4 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .visual-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: nowrap;
+        }
+
+        .mini-rect-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .mini-rect {
+            display: grid;
+            gap: 1px;
+            padding: 2px;
+            border: 2px solid #333;
+            border-radius: 4px;
+        }
+
+        .mini-rect.left-mini {
+            background: #a8e6cf;
+        }
+
+        .mini-rect.right-mini {
+            background: #ffd3b6;
+        }
+
+        .mini-cell {
+            width: 10px;
+            height: 10px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 2px;
+        }
+
+        .mini-equation {
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+            margin-top: 6px;
+        }
+
+        .mini-result {
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .visual-plus, .visual-equals {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            padding-top: 15px;
+        }
+
+        .final-answer-container {
+            display: flex;
+            align-items: flex-start;
+            padding-top: 8px;
+        }
+
+        .final-answer {
+            background: #ffd93d;
+            padding: 8px 16px;
+            border-radius: 10px;
+        }
+
+        .final-answer-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .wrong-popup-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .wrong-popup-btn {
+            padding: 12px 25px;
+            font-family: 'Bangers', cursive;
+            font-size: 18px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .wrong-popup-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .wrong-popup-btn.next-btn {
+            background: #fff;
+            color: #333;
+        }
+
+        .wrong-popup-btn.tryagain-btn {
+            background: #ffd93d;
+            color: #333;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            #title { font-size: 18px; }
+            .stat-value { font-size: 18px; }
+            #target-expression { font-size: 26px; padding: 6px 18px; }
+            .grid-cell { width: 18px; height: 18px; }
+            .dim-top, #dim-side { font-size: 16px; }
+            .choice { padding: 12px 10px; font-size: 17px; }
+            #equation-display { font-size: 16px; }
+            #start-screen h1 { font-size: 36px; }
+            #top-labels { padding-left: 26px; }
+        }
+
+        @media (max-width: 400px) {
+            .grid-cell { width: 14px; height: 14px; }
+            #target-expression { font-size: 22px; }
+            .choice { font-size: 15px; padding: 10px 8px; }
+            #top-labels { padding-left: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="header">
+            <div id="title">Rectangle Builder 🔷</div>
+            <div class="stat-row">
+                <div class="stat">
+                    <div class="stat-label">STREAK</div>
+                    <div class="streak-display" id="streak-display">
+                        <span class="stat-value" id="streak-value">0🔥</span>
+                    </div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">SCORE</div>
+                    <span class="stat-value" id="score-value">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-area">
+            <div id="main-card">
+                <div id="prompt">Which expression equals</div>
+                <div id="target-expression">4 × 9</div>
+                
+                <div id="rectangle-container">
+                    <div id="top-labels">
+                        <div class="dim-top" id="dim-left">5</div>
+                        <div class="dim-top" id="dim-right">4</div>
+                    </div>
+                    <div id="rectangle-wrapper">
+                        <div id="dim-side">4</div>
+                        <div id="rectangle-grid">
+                            <div class="rect-section left" id="rect-left"></div>
+                            <div class="rect-section right" id="rect-right"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="equation-display">
+                    <span class="eq-part left-part" id="eq-left">4 × 5</span>
+                    <span class="eq-op">+</span>
+                    <span class="eq-part right-part" id="eq-right">4 × 4</span>
+                    <span class="eq-op">=</span>
+                    <span class="eq-result" id="eq-result">?</span>
+                </div>
+            </div>
+
+            <div id="choices"></div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1>🔷 Rectangle Builder</h1>
+            
+            <!-- Animated demo showing rectangles combining -->
+            <div id="demo-container">
+                <!-- Rectangles row -->
+                <div id="demo-wrapper">
+                    <!-- Left rectangle section (4 × 2) -->
+                    <div class="demo-section left-section">
+                        <div class="demo-dim-top">2</div>
+                        <div class="demo-row">
+                            <div class="demo-dim-side">4</div>
+                            <div class="demo-rect left-demo">
+                                <div class="demo-cell"></div><div class="demo-cell"></div>
+                                <div class="demo-cell"></div><div class="demo-cell"></div>
+                                <div class="demo-cell"></div><div class="demo-cell"></div>
+                                <div class="demo-cell"></div><div class="demo-cell"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right rectangle section (4 × 4) -->
+                    <div class="demo-section right-section">
+                        <div class="demo-dim-top">4</div>
+                        <div class="demo-row">
+                            <div class="demo-dim-side demo-dim-fade">4</div>
+                            <div class="demo-rect right-demo">
+                                <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
+                                <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
+                                <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
+                                <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Equation labels row -->
+                <div id="demo-eq-row">
+                    <div class="demo-eq-label left-eq">4 × 2</div>
+                    <div id="demo-plus">+</div>
+                    <div class="demo-eq-label right-eq">4 × 4</div>
+                </div>
+                
+                <div id="demo-equation">= 4 × 6 = 24</div>
+            </div>
+            
+            <p>See how that works?</p>
+            <button id="start-btn">START</button>
+        </div>
+
+        <!-- Complete Popup (5 in a row milestone) -->
+        <div id="complete-popup">
+            <div id="complete-content">
+                <div id="complete-emoji">🎉</div>
+                <div id="complete-text">AWESOME!</div>
+                <div id="fox-message">You're a rectangle master!</div>
+            </div>
+        </div>
+
+        <!-- Correct Answer Popup -->
+        <div id="correct-popup">
+            <div id="correct-popup-content">
+                <div id="correct-popup-emoji">✅</div>
+                <div id="correct-popup-text">CORRECT!</div>
+                <div id="correct-popup-subtext">Nice one!</div>
+                
+                <div id="correct-visual-explanation">
+                    <div class="visual-row">
+                        <!-- Left mini rectangle -->
+                        <div class="mini-rect-container">
+                            <div class="mini-rect left-mini" id="correct-mini-rect-left"></div>
+                            <div class="mini-equation" id="correct-mini-eq-left">4 × 2</div>
+                            <div class="mini-result" id="correct-mini-result-left">8</div>
+                        </div>
+                        
+                        <div class="visual-plus">+</div>
+                        
+                        <!-- Right mini rectangle -->
+                        <div class="mini-rect-container">
+                            <div class="mini-rect right-mini" id="correct-mini-rect-right"></div>
+                            <div class="mini-equation" id="correct-mini-eq-right">4 × 4</div>
+                            <div class="mini-result" id="correct-mini-result-right">16</div>
+                        </div>
+                        
+                        <div class="visual-equals">=</div>
+                        
+                        <!-- Final answer -->
+                        <div class="final-answer-container">
+                            <div class="final-answer">
+                                <div class="final-answer-text" id="correct-final-answer">24</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="correct-next-btn">NEXT →</button>
+            </div>
+        </div>
+
+        <!-- Wrong Answer Popup -->
+        <div id="wrong-popup">
+            <div id="wrong-popup-content">
+                <div id="wrong-popup-emoji">🤔</div>
+                <div id="wrong-popup-text">NOT QUITE!</div>
+                <div id="wrong-popup-subtext">Let's see how it works...</div>
+                
+                <div id="visual-explanation">
+                    <h4>Break it into parts:</h4>
+                    <div class="visual-row">
+                        <!-- Left mini rectangle -->
+                        <div class="mini-rect-container">
+                            <div class="mini-rect left-mini" id="mini-rect-left"></div>
+                            <div class="mini-equation" id="mini-eq-left">4 × 2</div>
+                            <div class="mini-result" id="mini-result-left">8</div>
+                        </div>
+                        
+                        <div class="visual-plus">+</div>
+                        
+                        <!-- Right mini rectangle -->
+                        <div class="mini-rect-container">
+                            <div class="mini-rect right-mini" id="mini-rect-right"></div>
+                            <div class="mini-equation" id="mini-eq-right">4 × 4</div>
+                            <div class="mini-result" id="mini-result-right">16</div>
+                        </div>
+                        
+                        <div class="visual-equals">=</div>
+                        
+                        <!-- Final answer -->
+                        <div class="final-answer-container">
+                            <div class="final-answer">
+                                <div class="final-answer-text" id="final-answer">24</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="wrong-popup-buttons">
+                    <button class="wrong-popup-btn tryagain-btn" id="tryagain-btn">TRY AGAIN</button>
+                    <button class="wrong-popup-btn next-btn" id="wrong-next-btn">GOT IT →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Audio
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialDecayTo && gain.gain.exponentialDecayTo(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'wrong') {
+                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'complete') {
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.connect(g);
+                    g.connect(audioCtx.destination);
+                    o.frequency.value = freq;
+                    g.gain.setValueAtTime(0.2, audioCtx.currentTime + i * 0.1);
+                    g.gain.exponentialDecayTo && g.gain.exponentialDecayTo(0.01, audioCtx.currentTime + i * 0.1 + 0.3);
+                    o.start(audioCtx.currentTime + i * 0.1);
+                    o.stop(audioCtx.currentTime + i * 0.1 + 0.3);
+                });
+            }
+        }
+
+        // Game state
+        let score = 0;
+        let streak = 0;
+        let roundsInSet = 0;
+        let canAnswer = true;
+        let currentProblem = null;
+
+        // Elements
+        const startScreen = document.getElementById('start-screen');
+        const startBtn = document.getElementById('start-btn');
+        const mainCard = document.getElementById('main-card');
+        const targetExpressionEl = document.getElementById('target-expression');
+        const dimLeft = document.getElementById('dim-left');
+        const dimRight = document.getElementById('dim-right');
+        const dimSide = document.getElementById('dim-side');
+        const rectLeft = document.getElementById('rect-left');
+        const rectRight = document.getElementById('rect-right');
+        const eqLeft = document.getElementById('eq-left');
+        const eqRight = document.getElementById('eq-right');
+        const eqResult = document.getElementById('eq-result');
+        const choicesEl = document.getElementById('choices');
+        const scoreEl = document.getElementById('score-value');
+        const streakEl = document.getElementById('streak-value');
+        const streakDisplay = document.getElementById('streak-display');
+        const completePopup = document.getElementById('complete-popup');
+        const foxMessage = document.getElementById('fox-message');
+
+        const foxMessages = [
+            "Amazing work! 🎉",
+            "You're a rectangle pro!",
+            "Fantastic decomposing!",
+            "You nailed it!",
+            "Math superstar! ⭐",
+            "Keep building!",
+            "You're on fire! 🔥",
+            "Brilliant thinking!",
+            "Way to go, champ!",
+            "Distributive master!"
+        ];
+
+        // Problem types: decompose one factor
+        // Format: rows × (leftCols + rightCols)
+        // We show: rows × totalCols = rows × leftCols + rows × rightCols
+        function generateProblem() {
+            // Pick dimensions that make sense for 3rd grade
+            const rows = [2, 3, 4, 5, 6][Math.floor(Math.random() * 5)];
+            
+            // Split the other dimension into two parts
+            // Total should be between 6-10 for reasonable products
+            const totals = [6, 7, 8, 9];
+            const totalCols = totals[Math.floor(Math.random() * totals.length)];
+            
+            // Split totalCols into two parts (at least 1 each)
+            const leftCols = Math.floor(Math.random() * (totalCols - 2)) + 1; // 1 to totalCols-2
+            const rightCols = totalCols - leftCols;
+
+            const totalProduct = rows * totalCols;
+            const leftProduct = rows * leftCols;
+            const rightProduct = rows * rightCols;
+
+            return {
+                rows,
+                totalCols,
+                leftCols,
+                rightCols,
+                totalProduct,
+                leftProduct,
+                rightProduct
+            };
+        }
+
+        function renderRectangle(p) {
+            // Update dimension labels
+            dimSide.textContent = p.rows;
+            dimLeft.textContent = p.leftCols;
+            dimRight.textContent = p.rightCols;
+
+            // Clear and build left section
+            rectLeft.innerHTML = '';
+            rectLeft.style.gridTemplateColumns = `repeat(${p.leftCols}, 1fr)`;
+            for (let i = 0; i < p.rows * p.leftCols; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                rectLeft.appendChild(cell);
+            }
+
+            // Clear and build right section
+            rectRight.innerHTML = '';
+            rectRight.style.gridTemplateColumns = `repeat(${p.rightCols}, 1fr)`;
+            for (let i = 0; i < p.rows * p.rightCols; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                rectRight.appendChild(cell);
+            }
+
+            // Update equation display
+            eqLeft.textContent = `${p.rows} × ${p.leftCols}`;
+            eqRight.textContent = `${p.rows} × ${p.rightCols}`;
+            eqResult.textContent = '?';
+
+            // After render, measure actual section widths and match labels
+            requestAnimationFrame(() => {
+                const leftWidth = rectLeft.offsetWidth + 3; // +3 for dashed border
+                const rightWidth = rectRight.offsetWidth;
+                dimLeft.style.width = leftWidth + 'px';
+                dimRight.style.width = rightWidth + 'px';
+            });
+        }
+
+        function shuffleArray(arr) {
+            const shuffled = [...arr];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function generateChoices(p) {
+            const correct = p.totalProduct;
+            
+            // Generate plausible wrong answers
+            let distractors = new Set();
+            
+            // Common mistakes
+            distractors.add(p.leftProduct); // Only computed left part
+            distractors.add(p.rightProduct); // Only computed right part
+            distractors.add(p.leftProduct * p.rightProduct); // Multiplied instead of added
+            distractors.add(correct + p.rows); // Added extra row
+            distractors.add(correct - p.rows); // Missing a row
+            distractors.add(correct + 1);
+            distractors.add(correct - 1);
+            distractors.add(correct + 10);
+            distractors.add(p.rows + p.totalCols); // Added instead of multiplied
+            
+            // Filter valid distractors
+            let distractorArray = [...distractors].filter(d => d > 0 && d !== correct && d < 100);
+            distractorArray = shuffleArray(distractorArray).slice(0, 3);
+
+            // Ensure we have exactly 3 distractors
+            while (distractorArray.length < 3) {
+                const filler = correct + (Math.floor(Math.random() * 10) - 5);
+                if (filler > 0 && filler !== correct && !distractorArray.includes(filler)) {
+                    distractorArray.push(filler);
+                }
+            }
+
+            return shuffleArray([correct, ...distractorArray.slice(0, 3)]);
+        }
+
+        function loadProblem() {
+            currentProblem = generateProblem();
+            const p = currentProblem;
+
+            // Update target expression
+            targetExpressionEl.textContent = `${p.rows} × ${p.totalCols}`;
+
+            // Render the decomposed rectangle
+            renderRectangle(p);
+
+            // Render choices
+            const choices = generateChoices(p);
+            choicesEl.innerHTML = '';
+            choices.forEach(num => {
+                const div = document.createElement('div');
+                div.className = 'choice';
+                div.textContent = num;
+                div.addEventListener('click', () => handleChoice(num, div));
+                choicesEl.appendChild(div);
+            });
+
+            canAnswer = true;
+        }
+
+        function handleChoice(num, element) {
+            if (!canAnswer) return;
+
+            const correct = currentProblem.totalProduct;
+
+            if (num === correct) {
+                canAnswer = false;
+                playSound('correct');
+                element.classList.add('correct');
+
+                // Reveal answer
+                eqResult.textContent = correct;
+
+                // Flash card
+                mainCard.classList.add('correct-flash');
+                setTimeout(() => mainCard.classList.remove('correct-flash'), 400);
+
+                streak++;
+                score += 1;
+                updateStats();
+
+                roundsInSet++;
+
+                // Show correct popup
+                setTimeout(() => showCorrectPopup(), 300);
+            } else {
+                canAnswer = false;
+                playSound('wrong');
+                element.classList.add('wrong');
+                streak = 0;
+                updateStats();
+
+                // Show wrong popup with explanation
+                setTimeout(() => showWrongPopup(), 400);
+            }
+        }
+
+        // Correct messages based on streak level
+        const correctMsgsLow = [
+            { emoji: '✅', text: 'CORRECT!', sub: 'Nice one!' },
+            { emoji: '👍', text: 'GOT IT!', sub: 'Keep going!' },
+            { emoji: '💪', text: 'NICE!', sub: 'You know this!' }
+        ];
+
+        const correctMsgsMid = [
+            { emoji: '🔥', text: 'ON FIRE!', sub: ' in a row!' },
+            { emoji: '⭐', text: 'AWESOME!', sub: ' streak!' },
+            { emoji: '💥', text: 'BOOM!', sub: ' streak!' }
+        ];
+
+        const correctMsgsHigh = [
+            { emoji: '🚀', text: 'LEGENDARY!', sub: ' streak!' },
+            { emoji: '👑', text: 'ROYALTY!', sub: ' streak!' },
+            { emoji: '🏆', text: 'CHAMPION!', sub: ' streak!' }
+        ];
+
+        const correctMsgsUltra = [
+            { emoji: '🌟', text: 'GODLIKE!', sub: ' streak!' },
+            { emoji: '💎', text: 'DIAMOND!', sub: ' streak!' },
+            { emoji: '🔮', text: 'PSYCHIC!', sub: ' streak!' }
+        ];
+
+        function showCorrectPopup() {
+            const content = document.getElementById('correct-popup-content');
+            const emojiEl = document.getElementById('correct-popup-emoji');
+            const textEl = document.getElementById('correct-popup-text');
+            const subEl = document.getElementById('correct-popup-subtext');
+            
+            // Reset classes
+            content.className = '';
+            
+            // Pick message based on streak
+            let msg;
+            
+            if (streak >= 10) {
+                msg = correctMsgsUltra[Math.floor(Math.random() * correctMsgsUltra.length)];
+                content.classList.add('streak-10');
+                spawnConfetti(20);
+            } else if (streak >= 5) {
+                msg = correctMsgsHigh[Math.floor(Math.random() * correctMsgsHigh.length)];
+                content.classList.add('streak-5');
+                spawnConfetti(12);
+            } else if (streak >= 3) {
+                msg = correctMsgsMid[Math.floor(Math.random() * correctMsgsMid.length)];
+                content.classList.add('streak-3');
+                spawnEmoji('🔥');
+            } else {
+                msg = correctMsgsLow[Math.floor(Math.random() * correctMsgsLow.length)];
+            }
+            
+            emojiEl.textContent = msg.emoji;
+            textEl.textContent = msg.text;
+            
+            // Add streak number to subtitle for streaks >= 3
+            if (streak >= 3) {
+                subEl.textContent = streak + msg.sub;
+            } else {
+                subEl.textContent = msg.sub;
+            }
+            
+            // Build mini rectangles for visual explanation
+            const p = currentProblem;
+            
+            // Left mini rectangle
+            const miniLeft = document.getElementById('correct-mini-rect-left');
+            miniLeft.innerHTML = '';
+            miniLeft.style.gridTemplateColumns = `repeat(${p.leftCols}, 1fr)`;
+            for (let i = 0; i < p.rows * p.leftCols; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'mini-cell';
+                miniLeft.appendChild(cell);
+            }
+            
+            // Right mini rectangle
+            const miniRight = document.getElementById('correct-mini-rect-right');
+            miniRight.innerHTML = '';
+            miniRight.style.gridTemplateColumns = `repeat(${p.rightCols}, 1fr)`;
+            for (let i = 0; i < p.rows * p.rightCols; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'mini-cell';
+                miniRight.appendChild(cell);
+            }
+            
+            // Update equations and results
+            document.getElementById('correct-mini-eq-left').textContent = `${p.rows} × ${p.leftCols}`;
+            document.getElementById('correct-mini-result-left').textContent = p.leftProduct;
+            document.getElementById('correct-mini-eq-right').textContent = `${p.rows} × ${p.rightCols}`;
+            document.getElementById('correct-mini-result-right').textContent = p.rightProduct;
+            document.getElementById('correct-final-answer').textContent = p.totalProduct;
+            
+            document.getElementById('correct-popup').classList.add('show');
+        }
+
+        function hideCorrectPopup() {
+            document.getElementById('correct-popup').classList.remove('show');
+            
+            // Check for milestone
+            if (roundsInSet >= 5) {
+                setTimeout(() => {
+                    playSound('complete');
+                    // Milestone celebration - no bonus score
+                    updateStats();
+                    foxMessage.textContent = foxMessages[Math.floor(Math.random() * foxMessages.length)];
+                    completePopup.classList.add('show');
+                    spawnConfetti(25);
+
+                    setTimeout(() => {
+                        completePopup.classList.remove('show');
+                        roundsInSet = 0;
+                        loadProblem();
+                    }, 2200);
+                }, 200);
+            } else {
+                loadProblem();
+            }
+        }
+
+        const wrongMessages = [
+            { emoji: '🤔', text: 'NOT QUITE!', sub: "Let's break it down..." },
+            { emoji: '😅', text: 'OOPS!', sub: "Here's how it works..." },
+            { emoji: '🧐', text: 'ALMOST!', sub: "Check this out..." },
+            { emoji: '💭', text: 'THINK AGAIN!', sub: "Let me show you..." }
+        ];
+
+        function showWrongPopup() {
+            const msg = wrongMessages[Math.floor(Math.random() * wrongMessages.length)];
+            document.getElementById('wrong-popup-emoji').textContent = msg.emoji;
+            document.getElementById('wrong-popup-text').textContent = msg.text;
+            document.getElementById('wrong-popup-subtext').textContent = msg.sub;
+            
+            const p = currentProblem;
+            
+            // Build left mini rectangle
+            const miniLeft = document.getElementById('mini-rect-left');
+            miniLeft.innerHTML = '';
+            miniLeft.style.gridTemplateColumns = `repeat(${p.leftCols}, 1fr)`;
+            for (let i = 0; i < p.rows * p.leftCols; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'mini-cell';
+                miniLeft.appendChild(cell);
+            }
+            
+            // Build right mini rectangle
+            const miniRight = document.getElementById('mini-rect-right');
+            miniRight.innerHTML = '';
+            miniRight.style.gridTemplateColumns = `repeat(${p.rightCols}, 1fr)`;
+            for (let i = 0; i < p.rows * p.rightCols; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'mini-cell';
+                miniRight.appendChild(cell);
+            }
+            
+            // Fill in equations
+            document.getElementById('mini-eq-left').textContent = `${p.rows} × ${p.leftCols}`;
+            document.getElementById('mini-result-left').textContent = p.leftProduct;
+            document.getElementById('mini-eq-right').textContent = `${p.rows} × ${p.rightCols}`;
+            document.getElementById('mini-result-right').textContent = p.rightProduct;
+            document.getElementById('final-answer').textContent = p.totalProduct;
+            
+            document.getElementById('wrong-popup').classList.add('show');
+        }
+
+        function hideWrongPopup(tryAgain = false) {
+            document.getElementById('wrong-popup').classList.remove('show');
+            
+            if (tryAgain) {
+                // Let them try the same problem again
+                canAnswer = true;
+                // Remove wrong class from all choices
+                document.querySelectorAll('.choice.wrong').forEach(el => el.classList.remove('wrong'));
+            } else {
+                loadProblem();
+            }
+        }
+
+        // Wire up popup buttons
+        document.getElementById('correct-next-btn').addEventListener('click', hideCorrectPopup);
+        document.getElementById('wrong-next-btn').addEventListener('click', () => hideWrongPopup(false));
+        document.getElementById('tryagain-btn').addEventListener('click', () => hideWrongPopup(true));
+
+        function updateStats() {
+            scoreEl.textContent = score;
+            streakEl.textContent = streak + '🔥';
+            streakDisplay.classList.toggle('hot', streak >= 5);
+        }
+
+        function spawnEmoji(emoji) {
+            const el = document.createElement('div');
+            el.className = 'flying-emoji';
+            el.textContent = emoji;
+            el.style.left = (30 + Math.random() * 40) + '%';
+            el.style.top = '50%';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 700);
+        }
+
+        function spawnConfetti(count) {
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    const c = document.createElement('div');
+                    c.className = 'confetti';
+                    c.style.left = Math.random() * 100 + 'vw';
+                    c.style.width = c.style.height = (6 + Math.random() * 8) + 'px';
+                    c.style.background = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff9ff3','#a55eea'][Math.floor(Math.random()*6)];
+                    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    document.body.appendChild(c);
+                    setTimeout(() => c.remove(), 2000);
+                }, i * 30);
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            streak = 0;
+            roundsInSet = 0;
+            updateStats();
+            startScreen.classList.add('hidden');
+            loadProblem();
+        }
+
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            startGame();
+        });
+    </script>
+</body>
+</html>
