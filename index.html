@@ -101,11 +101,12 @@
         #main-card {
             background: #fff;
             border-radius: 20px;
-            padding: 20px;
+            padding: 25px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            justify-content: center;
+            gap: 20px;
         }
 
         #main-card.correct-flash {
@@ -117,38 +118,22 @@
             50% { box-shadow: 0 0 30px rgba(46, 213, 115, 0.6); }
         }
 
-        /* Question prompt */
-        #prompt {
-            font-size: 16px;
-            color: #666;
-            text-align: center;
-        }
-
-        #target-expression {
-            font-size: 32px;
-            font-weight: 700;
-            color: #333;
-            background: #ffd93d;
-            padding: 8px 24px;
-            border-radius: 12px;
-        }
-
         /* Rectangle container */
         #rectangle-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 8px;
         }
 
         /* Top labels row - must match width of rectangle */
         #top-labels {
             display: flex;
-            padding-left: 30px; /* Match side label width */
+            padding-left: 36px; /* Match side label width */
         }
 
         .dim-top {
-            font-size: 18px;
+            font-size: 24px;
             font-weight: 700;
             color: #333;
             text-align: center;
@@ -161,56 +146,94 @@
         #rectangle-wrapper {
             display: flex;
             align-items: stretch;
-            gap: 6px;
+            gap: 8px;
         }
 
         /* Side dimension label */
         #dim-side {
-            font-size: 18px;
+            font-size: 24px;
             font-weight: 700;
             color: #333;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 24px;
+            min-width: 28px;
         }
 
         /* The rectangle grid */
         #rectangle-grid {
             display: flex;
-            border: 3px solid #333;
-            border-radius: 4px;
-            overflow: hidden;
+            border-radius: 6px;
+            overflow: visible;
         }
 
         .rect-section {
             display: grid;
-            gap: 2px;
-            padding: 4px;
+            gap: 3px;
+            padding: 6px;
+            border: 4px solid #333;
         }
 
         .rect-section.left {
             background: #a8e6cf;
-            border-right: 3px dashed #333;
+            border-radius: 6px 0 0 6px;
+            border-right: 4px dashed #333;
         }
 
         .rect-section.right {
             background: #ffd3b6;
+            border-radius: 0 6px 6px 0;
+            border-left: none;
+        }
+
+        /* Animation: rectangles start apart and merge together slowly */
+        .rect-section.left.animate-merge {
+            animation: mergeFromLeft 2s ease-in-out forwards;
+        }
+
+        .rect-section.right.animate-merge {
+            animation: mergeFromRight 2s ease-in-out forwards;
+        }
+
+        @keyframes mergeFromLeft {
+            0% { 
+                transform: translateX(-30px); 
+                border-radius: 6px;
+                border-right: 4px solid #333;
+            }
+            100% { 
+                transform: translateX(0); 
+                border-radius: 6px 0 0 6px;
+                border-right: 4px dashed #333;
+            }
+        }
+
+        @keyframes mergeFromRight {
+            0% { 
+                transform: translateX(30px); 
+                border-radius: 6px;
+                border-left: 4px solid #333;
+            }
+            100% { 
+                transform: translateX(0); 
+                border-radius: 0 6px 6px 0;
+                border-left: none;
+            }
         }
 
         .grid-cell {
-            width: 22px;
-            height: 22px;
+            width: 32px;
+            height: 32px;
             background: rgba(255,255,255,0.4);
-            border-radius: 3px;
+            border-radius: 4px;
         }
 
         /* Equation display below rectangle */
         #equation-display {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 20px;
+            gap: 10px;
+            font-size: 26px;
             font-weight: 600;
             color: #333;
             flex-wrap: wrap;
@@ -218,8 +241,8 @@
         }
 
         .eq-part {
-            padding: 4px 10px;
-            border-radius: 8px;
+            padding: 8px 16px;
+            border-radius: 10px;
         }
 
         .eq-part.left-part {
@@ -237,8 +260,8 @@
 
         .eq-result {
             background: #ffd93d;
-            padding: 4px 12px;
-            border-radius: 8px;
+            padding: 8px 18px;
+            border-radius: 10px;
         }
 
         /* Choices */
@@ -275,15 +298,15 @@
         }
 
         .choice.correct {
-            background: #00ff88;
-            border-color: #00cc6a;
+            background: linear-gradient(135deg, #2ed573, #1abc9c) !important;
+            border-color: #1abc9c;
             animation: correctPop 0.4s ease;
         }
 
         .choice.wrong {
-            background: #ff6b6b;
-            border-color: #ee5253;
-            animation: shake 0.4s ease;
+            background: linear-gradient(135deg, #E8A838, #F5C563) !important;
+            border-color: #E8A838;
+            animation: gentleShake 0.4s ease;
         }
 
         @keyframes correctPop {
@@ -291,10 +314,10 @@
             50% { transform: scale(1.08); }
         }
 
-        @keyframes shake {
+        @keyframes gentleShake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-6px); }
-            75% { transform: translateX(6px); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
         }
 
         /* Start screen */
@@ -566,18 +589,23 @@
             color: rgba(255,255,255,0.9);
         }
 
-        /* Flying emojis */
-        .flying-emoji {
+        /* Flying emojis - scale with streak */
+        .flying-emoji-correct {
             position: fixed;
-            font-size: 30px;
+            font-size: 50px;
             pointer-events: none;
-            animation: flyUp 0.7s ease-out forwards;
-            z-index: 300;
+            z-index: 500;
+            animation: flyUpCorrect 1.2s ease-out forwards;
         }
 
-        @keyframes flyUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-100px) scale(1.5); }
+        .flying-emoji-correct.streak-mid { font-size: 65px; }
+        .flying-emoji-correct.streak-high { font-size: 80px; }
+        .flying-emoji-correct.streak-ultra { font-size: 100px; }
+
+        @keyframes flyUpCorrect {
+            0% { transform: scale(0) translateY(0); opacity: 1; }
+            30% { transform: scale(1.3) translateY(-100px); opacity: 1; }
+            100% { transform: scale(1) translateY(-500px); opacity: 0; }
         }
 
         /* Confetti */
@@ -670,13 +698,6 @@
             margin-bottom: 15px;
         }
 
-        #correct-visual-explanation {
-            background: rgba(255,255,255,0.95);
-            border-radius: 15px;
-            padding: 15px 20px;
-            margin-bottom: 15px;
-        }
-
         #correct-next-btn {
             background: #fff;
             color: #333;
@@ -690,6 +711,85 @@
         }
 
         #correct-next-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* ===== STREAK CELEBRATION POPUP ===== */
+        #streak-popup {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        #streak-popup.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #streak-popup-content {
+            background: linear-gradient(135deg, #f39c12, #e74c3c);
+            padding: 30px 40px;
+            border-radius: 25px;
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.3s;
+            animation: streakPulse 0.5s ease infinite alternate;
+        }
+
+        #streak-popup.show #streak-popup-content {
+            transform: scale(1);
+        }
+
+        @keyframes streakPulse {
+            to { transform: scale(1.02); }
+        }
+
+        #streak-popup-emoji {
+            font-size: 70px;
+            margin-bottom: 10px;
+        }
+
+        #streak-popup-title {
+            font-family: 'Bangers', cursive;
+            font-size: 42px;
+            color: #fff;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+
+        #streak-count {
+            font-family: 'Bangers', cursive;
+            font-size: 64px;
+            color: #ffd93d;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+
+        #growth-message {
+            font-size: 18px;
+            color: rgba(255,255,255,0.95);
+            margin: 15px 0;
+            max-width: 300px;
+        }
+
+        #streak-continue-btn {
+            background: #fff;
+            color: #333;
+            font-family: 'Bangers', cursive;
+            font-size: 22px;
+            padding: 12px 40px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        #streak-continue-btn:hover {
             transform: scale(1.05);
         }
 
@@ -713,7 +813,7 @@
         }
 
         #wrong-popup-content {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            background: linear-gradient(135deg, #E8A838, #F5C563);
             padding: 25px 30px;
             border-radius: 25px;
             text-align: center;
@@ -730,12 +830,6 @@
         #wrong-popup-emoji {
             font-size: 50px;
             margin-bottom: 8px;
-            animation: emojiShake 0.5s ease infinite alternate;
-        }
-
-        @keyframes emojiShake {
-            from { transform: rotate(-10deg); }
-            to { transform: rotate(10deg); }
         }
 
         #wrong-popup-text {
@@ -743,152 +837,64 @@
             font-size: 32px;
             color: #fff;
             margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         #wrong-popup-subtext {
             font-size: 16px;
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 15px;
+            color: rgba(255,255,255,0.95);
+            margin-bottom: 20px;
         }
 
-        /* Visual explanation with mini rectangles */
-        #visual-explanation {
-            background: rgba(255,255,255,0.95);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-
-        #visual-explanation h4 {
-            color: #333;
-            font-size: 16px;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .visual-row {
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: nowrap;
-        }
-
-        .mini-rect-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .mini-rect {
-            display: grid;
-            gap: 1px;
-            padding: 2px;
-            border: 2px solid #333;
-            border-radius: 4px;
-        }
-
-        .mini-rect.left-mini {
-            background: #a8e6cf;
-        }
-
-        .mini-rect.right-mini {
-            background: #ffd3b6;
-        }
-
-        .mini-cell {
-            width: 10px;
-            height: 10px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 2px;
-        }
-
-        .mini-equation {
-            font-size: 14px;
-            font-weight: 700;
-            color: #333;
-            margin-top: 6px;
-        }
-
-        .mini-result {
-            font-size: 18px;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .visual-plus, .visual-equals {
-            font-size: 24px;
-            font-weight: 700;
-            color: #667eea;
-            padding-top: 15px;
-        }
-
-        .final-answer-container {
-            display: flex;
-            align-items: flex-start;
-            padding-top: 8px;
-        }
-
-        .final-answer {
-            background: #ffd93d;
-            padding: 8px 16px;
-            border-radius: 10px;
-        }
-
-        .final-answer-text {
-            font-size: 18px;
-            font-weight: 700;
-            color: #333;
-        }
-
-        .wrong-popup-buttons {
+        .wrong-popup-btn-row {
             display: flex;
             gap: 12px;
             justify-content: center;
         }
 
         .wrong-popup-btn {
-            padding: 12px 25px;
+            padding: 12px 24px;
             font-family: 'Bangers', cursive;
             font-size: 18px;
             border: none;
             border-radius: 25px;
             cursor: pointer;
             transition: transform 0.1s;
+            color: #333;
+        }
+
+        .wrong-popup-btn.btn-amber {
+            background: #fff;
+        }
+
+        .wrong-popup-btn.btn-secondary {
+            background: rgba(255,255,255,0.3);
+            color: #fff;
         }
 
         .wrong-popup-btn:hover {
             transform: scale(1.05);
         }
 
-        .wrong-popup-btn.next-btn {
-            background: #fff;
-            color: #333;
-        }
-
-        .wrong-popup-btn.tryagain-btn {
-            background: #ffd93d;
-            color: #333;
-        }
-
         /* Responsive */
         @media (max-width: 600px) {
             #title { font-size: 18px; }
             .stat-value { font-size: 18px; }
-            #target-expression { font-size: 26px; padding: 6px 18px; }
-            .grid-cell { width: 18px; height: 18px; }
-            .dim-top, #dim-side { font-size: 16px; }
+            .grid-cell { width: 26px; height: 26px; }
+            .dim-top, #dim-side { font-size: 20px; }
             .choice { padding: 12px 10px; font-size: 17px; }
-            #equation-display { font-size: 16px; }
+            #equation-display { font-size: 20px; }
+            .eq-part { padding: 6px 12px; }
             #start-screen h1 { font-size: 36px; }
-            #top-labels { padding-left: 26px; }
+            #top-labels { padding-left: 30px; }
         }
 
         @media (max-width: 400px) {
-            .grid-cell { width: 14px; height: 14px; }
-            #target-expression { font-size: 22px; }
+            .grid-cell { width: 20px; height: 20px; }
             .choice { font-size: 15px; padding: 10px 8px; }
-            #top-labels { padding-left: 22px; }
+            #equation-display { font-size: 18px; }
+            .eq-part { padding: 5px 10px; }
+            #top-labels { padding-left: 26px; }
         }
     </style>
 </head>
@@ -912,9 +918,6 @@
 
         <div id="game-area">
             <div id="main-card">
-                <div id="prompt">Which expression equals</div>
-                <div id="target-expression">4 × 9</div>
-                
                 <div id="rectangle-container">
                     <div id="top-labels">
                         <div class="dim-top" id="dim-left">5</div>
@@ -1008,36 +1011,18 @@
                 <div id="correct-popup-text">CORRECT!</div>
                 <div id="correct-popup-subtext">Nice one!</div>
                 
-                <div id="correct-visual-explanation">
-                    <div class="visual-row">
-                        <!-- Left mini rectangle -->
-                        <div class="mini-rect-container">
-                            <div class="mini-rect left-mini" id="correct-mini-rect-left"></div>
-                            <div class="mini-equation" id="correct-mini-eq-left">4 × 2</div>
-                            <div class="mini-result" id="correct-mini-result-left">8</div>
-                        </div>
-                        
-                        <div class="visual-plus">+</div>
-                        
-                        <!-- Right mini rectangle -->
-                        <div class="mini-rect-container">
-                            <div class="mini-rect right-mini" id="correct-mini-rect-right"></div>
-                            <div class="mini-equation" id="correct-mini-eq-right">4 × 4</div>
-                            <div class="mini-result" id="correct-mini-result-right">16</div>
-                        </div>
-                        
-                        <div class="visual-equals">=</div>
-                        
-                        <!-- Final answer -->
-                        <div class="final-answer-container">
-                            <div class="final-answer">
-                                <div class="final-answer-text" id="correct-final-answer">24</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
                 <button id="correct-next-btn">NEXT →</button>
+            </div>
+        </div>
+
+        <!-- Streak Celebration Popup -->
+        <div id="streak-popup">
+            <div id="streak-popup-content">
+                <div id="streak-popup-emoji">🔥</div>
+                <div id="streak-popup-title">STREAK!</div>
+                <div id="streak-count">3</div>
+                <div id="growth-message">Mistakes in math are OK!</div>
+                <button id="streak-continue-btn">Keep Going! 💪</button>
             </div>
         </div>
 
@@ -1045,42 +1030,17 @@
         <div id="wrong-popup">
             <div id="wrong-popup-content">
                 <div id="wrong-popup-emoji">🤔</div>
-                <div id="wrong-popup-text">NOT QUITE!</div>
-                <div id="wrong-popup-subtext">Let's see how it works...</div>
+                <div id="wrong-popup-text">Not Quite!</div>
+                <div id="wrong-popup-subtext">The process is more important than the answer!</div>
                 
-                <div id="visual-explanation">
-                    <h4>Break it into parts:</h4>
-                    <div class="visual-row">
-                        <!-- Left mini rectangle -->
-                        <div class="mini-rect-container">
-                            <div class="mini-rect left-mini" id="mini-rect-left"></div>
-                            <div class="mini-equation" id="mini-eq-left">4 × 2</div>
-                            <div class="mini-result" id="mini-result-left">8</div>
-                        </div>
-                        
-                        <div class="visual-plus">+</div>
-                        
-                        <!-- Right mini rectangle -->
-                        <div class="mini-rect-container">
-                            <div class="mini-rect right-mini" id="mini-rect-right"></div>
-                            <div class="mini-equation" id="mini-eq-right">4 × 4</div>
-                            <div class="mini-result" id="mini-result-right">16</div>
-                        </div>
-                        
-                        <div class="visual-equals">=</div>
-                        
-                        <!-- Final answer -->
-                        <div class="final-answer-container">
-                            <div class="final-answer">
-                                <div class="final-answer-text" id="final-answer">24</div>
-                            </div>
-                        </div>
-                    </div>
+                <div id="correct-answer-area" style="display: none;">
+                    <div class="correct-answer-label" style="color: #333; font-weight: 600; margin-bottom: 8px;">The correct answer was:</div>
+                    <div id="correct-answer-display" style="font-size: 32px; font-weight: 700; color: #333;"></div>
                 </div>
                 
-                <div class="wrong-popup-buttons">
-                    <button class="wrong-popup-btn tryagain-btn" id="tryagain-btn">TRY AGAIN</button>
-                    <button class="wrong-popup-btn next-btn" id="wrong-next-btn">GOT IT →</button>
+                <div class="wrong-popup-btn-row">
+                    <button class="wrong-popup-btn btn-amber" id="try-again-btn">Try Again 🔄</button>
+                    <button class="wrong-popup-btn btn-secondary" id="show-answer-btn">Show Answer 👀</button>
                 </div>
             </div>
         </div>
@@ -1101,31 +1061,46 @@
             gain.connect(audioCtx.destination);
 
             if (type === 'correct') {
-                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
-                osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.exponentialDecayTo && gain.gain.exponentialDecayTo(0.01, audioCtx.currentTime + 0.3);
+                // 3-note ascending arpeggio (C5 → E5 → G5)
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(784, audioCtx.currentTime + 0.16);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.3);
             } else if (type === 'wrong') {
+                // Gentle descending tone
+                osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-                osc.frequency.setValueAtTime(150, audioCtx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.2);
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'streak') {
+                // 4-note fanfare
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.1);
+                osc.frequency.setValueAtTime(784, audioCtx.currentTime + 0.2);
+                osc.frequency.setValueAtTime(1047, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
             } else if (type === 'complete') {
-                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
-                    const o = audioCtx.createOscillator();
-                    const g = audioCtx.createGain();
-                    o.connect(g);
-                    g.connect(audioCtx.destination);
-                    o.frequency.value = freq;
-                    g.gain.setValueAtTime(0.2, audioCtx.currentTime + i * 0.1);
-                    g.gain.exponentialDecayTo && g.gain.exponentialDecayTo(0.01, audioCtx.currentTime + i * 0.1 + 0.3);
-                    o.start(audioCtx.currentTime + i * 0.1);
-                    o.stop(audioCtx.currentTime + i * 0.1 + 0.3);
-                });
+                // Victory fanfare
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.12);
+                osc.frequency.setValueAtTime(784, audioCtx.currentTime + 0.24);
+                osc.frequency.setValueAtTime(1047, audioCtx.currentTime + 0.36);
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.6);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.6);
             }
         }
 
@@ -1140,7 +1115,6 @@
         const startScreen = document.getElementById('start-screen');
         const startBtn = document.getElementById('start-btn');
         const mainCard = document.getElementById('main-card');
-        const targetExpressionEl = document.getElementById('target-expression');
         const dimLeft = document.getElementById('dim-left');
         const dimRight = document.getElementById('dim-right');
         const dimSide = document.getElementById('dim-side');
@@ -1169,35 +1143,71 @@
             "Distributive master!"
         ];
 
+        // Track recent problems to avoid repeats
+        let recentProblems = [];
+        const MAX_RECENT = 20; // Remember last 20 problems
+
         // Problem types: decompose one factor
         // Format: rows × (leftCols + rightCols)
         // We show: rows × totalCols = rows × leftCols + rows × rightCols
         function generateProblem() {
-            // Pick dimensions that make sense for 3rd grade
-            const rows = [2, 3, 4, 5, 6][Math.floor(Math.random() * 5)];
+            let attempts = 0;
+            const maxAttempts = 50;
             
-            // Split the other dimension into two parts
-            // Total should be between 6-10 for reasonable products
-            const totals = [6, 7, 8, 9];
-            const totalCols = totals[Math.floor(Math.random() * totals.length)];
+            while (attempts < maxAttempts) {
+                attempts++;
+                
+                // Expanded ranges to match curriculum (ML 4.09)
+                // Rows: 2-8 (curriculum uses 3, 4, 5, 6, 8)
+                const rows = [2, 3, 4, 5, 6, 7, 8][Math.floor(Math.random() * 7)];
+                
+                // Total columns: 5-10 (curriculum uses 5-9 range)
+                const totals = [5, 6, 7, 8, 9, 10];
+                const totalCols = totals[Math.floor(Math.random() * totals.length)];
+                
+                // Skip if product would be too large for 3rd grade
+                if (rows * totalCols > 80) continue;
+                
+                // Split totalCols into two parts (at least 2 each for visual clarity)
+                const minSplit = 2;
+                const maxLeftCols = totalCols - minSplit;
+                if (maxLeftCols < minSplit) continue;
+                
+                const leftCols = Math.floor(Math.random() * (maxLeftCols - minSplit + 1)) + minSplit;
+                const rightCols = totalCols - leftCols;
+
+                const totalProduct = rows * totalCols;
+                const leftProduct = rows * leftCols;
+                const rightProduct = rows * rightCols;
+                
+                // Create unique key for this problem
+                const problemKey = `${rows}x${leftCols}+${rightCols}`;
+                
+                // Check if this problem was recently used
+                if (recentProblems.includes(problemKey)) {
+                    continue; // Try again
+                }
+                
+                // Add to recent problems
+                recentProblems.push(problemKey);
+                if (recentProblems.length > MAX_RECENT) {
+                    recentProblems.shift(); // Remove oldest
+                }
+
+                return {
+                    rows,
+                    totalCols,
+                    leftCols,
+                    rightCols,
+                    totalProduct,
+                    leftProduct,
+                    rightProduct
+                };
+            }
             
-            // Split totalCols into two parts (at least 1 each)
-            const leftCols = Math.floor(Math.random() * (totalCols - 2)) + 1; // 1 to totalCols-2
-            const rightCols = totalCols - leftCols;
-
-            const totalProduct = rows * totalCols;
-            const leftProduct = rows * leftCols;
-            const rightProduct = rows * rightCols;
-
-            return {
-                rows,
-                totalCols,
-                leftCols,
-                rightCols,
-                totalProduct,
-                leftProduct,
-                rightProduct
-            };
+            // Fallback if we couldn't find a unique problem (shouldn't happen)
+            recentProblems = []; // Clear history
+            return generateProblem();
         }
 
         function renderRectangle(p) {
@@ -1228,6 +1238,16 @@
             eqLeft.textContent = `${p.rows} × ${p.leftCols}`;
             eqRight.textContent = `${p.rows} × ${p.rightCols}`;
             eqResult.textContent = '?';
+
+            // Trigger merge animation - rectangles start apart and come together
+            rectLeft.classList.remove('animate-merge');
+            rectRight.classList.remove('animate-merge');
+            
+            // Force reflow to restart animation
+            void rectLeft.offsetWidth;
+            
+            rectLeft.classList.add('animate-merge');
+            rectRight.classList.add('animate-merge');
 
             // After render, measure actual section widths and match labels
             requestAnimationFrame(() => {
@@ -1283,9 +1303,6 @@
             currentProblem = generateProblem();
             const p = currentProblem;
 
-            // Update target expression
-            targetExpressionEl.textContent = `${p.rows} × ${p.totalCols}`;
-
             // Render the decomposed rectangle
             renderRectangle(p);
 
@@ -1326,8 +1343,25 @@
 
                 roundsInSet++;
 
-                // Show correct popup
-                setTimeout(() => showCorrectPopup(), 300);
+                // Spawn emojis scaled by streak
+                let emojiCount = 6;
+                if (streak >= 10) emojiCount = 25;
+                else if (streak >= 6) emojiCount = 18;
+                else if (streak >= 3) emojiCount = 12;
+                spawnCorrectEmojis(emojiCount, streak);
+
+                // Spawn confetti scaled by streak
+                if (streak >= 10) spawnConfetti(30);
+                else if (streak >= 6) spawnConfetti(20);
+                else if (streak >= 3) spawnConfetti(10);
+
+                // Show streak celebration every 3, or regular correct popup
+                if (streak > 0 && streak % 3 === 0) {
+                    playSound('streak');
+                    setTimeout(() => showStreakCelebration(), 300);
+                } else {
+                    setTimeout(() => showCorrectPopup(), 300);
+                }
             } else {
                 canAnswer = false;
                 playSound('wrong');
@@ -1335,10 +1369,26 @@
                 streak = 0;
                 updateStats();
 
-                // Show wrong popup with explanation
+                // Show wrong popup
                 setTimeout(() => showWrongPopup(), 400);
             }
         }
+
+        // Growth mindset messages
+        const growthMessages = [
+            "Mistakes in math are OK!",
+            "I have positive math esteem!",
+            "The process is more important than the answer!",
+            "Math is hard, but I can do it!",
+            "There's ALWAYS more than one way to solve it!",
+            "I can learn anything in math!",
+            "I believe I can be good at math!",
+            "Be a problem solver!",
+            "If I don't get it the first time, I can try a new way!",
+            "Math helps me become a thinker!",
+            "Math can be fun!",
+            "Talking about math helps me learn!"
+        ];
 
         // Correct messages based on streak level
         const correctMsgsLow = [
@@ -1380,15 +1430,12 @@
             if (streak >= 10) {
                 msg = correctMsgsUltra[Math.floor(Math.random() * correctMsgsUltra.length)];
                 content.classList.add('streak-10');
-                spawnConfetti(20);
             } else if (streak >= 5) {
                 msg = correctMsgsHigh[Math.floor(Math.random() * correctMsgsHigh.length)];
                 content.classList.add('streak-5');
-                spawnConfetti(12);
             } else if (streak >= 3) {
                 msg = correctMsgsMid[Math.floor(Math.random() * correctMsgsMid.length)];
                 content.classList.add('streak-3');
-                spawnEmoji('🔥');
             } else {
                 msg = correctMsgsLow[Math.floor(Math.random() * correctMsgsLow.length)];
             }
@@ -1403,47 +1450,23 @@
                 subEl.textContent = msg.sub;
             }
             
-            // Build mini rectangles for visual explanation
-            const p = currentProblem;
-            
-            // Left mini rectangle
-            const miniLeft = document.getElementById('correct-mini-rect-left');
-            miniLeft.innerHTML = '';
-            miniLeft.style.gridTemplateColumns = `repeat(${p.leftCols}, 1fr)`;
-            for (let i = 0; i < p.rows * p.leftCols; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'mini-cell';
-                miniLeft.appendChild(cell);
-            }
-            
-            // Right mini rectangle
-            const miniRight = document.getElementById('correct-mini-rect-right');
-            miniRight.innerHTML = '';
-            miniRight.style.gridTemplateColumns = `repeat(${p.rightCols}, 1fr)`;
-            for (let i = 0; i < p.rows * p.rightCols; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'mini-cell';
-                miniRight.appendChild(cell);
-            }
-            
-            // Update equations and results
-            document.getElementById('correct-mini-eq-left').textContent = `${p.rows} × ${p.leftCols}`;
-            document.getElementById('correct-mini-result-left').textContent = p.leftProduct;
-            document.getElementById('correct-mini-eq-right').textContent = `${p.rows} × ${p.rightCols}`;
-            document.getElementById('correct-mini-result-right').textContent = p.rightProduct;
-            document.getElementById('correct-final-answer').textContent = p.totalProduct;
-            
             document.getElementById('correct-popup').classList.add('show');
         }
 
-        function hideCorrectPopup() {
-            document.getElementById('correct-popup').classList.remove('show');
+        function showStreakCelebration() {
+            document.getElementById('streak-count').textContent = streak;
+            document.getElementById('growth-message').textContent = 
+                growthMessages[Math.floor(Math.random() * growthMessages.length)];
+            document.getElementById('streak-popup').classList.add('show');
+        }
+
+        function hideStreakPopup() {
+            document.getElementById('streak-popup').classList.remove('show');
             
             // Check for milestone
             if (roundsInSet >= 5) {
                 setTimeout(() => {
                     playSound('complete');
-                    // Milestone celebration - no bonus score
                     updateStats();
                     foxMessage.textContent = foxMessages[Math.floor(Math.random() * foxMessages.length)];
                     completePopup.classList.add('show');
@@ -1460,68 +1483,82 @@
             }
         }
 
-        const wrongMessages = [
-            { emoji: '🤔', text: 'NOT QUITE!', sub: "Let's break it down..." },
-            { emoji: '😅', text: 'OOPS!', sub: "Here's how it works..." },
-            { emoji: '🧐', text: 'ALMOST!', sub: "Check this out..." },
-            { emoji: '💭', text: 'THINK AGAIN!', sub: "Let me show you..." }
-        ];
+        function hideCorrectPopup() {
+            document.getElementById('correct-popup').classList.remove('show');
+            
+            // Check for milestone
+            if (roundsInSet >= 5) {
+                setTimeout(() => {
+                    playSound('complete');
+                    updateStats();
+                    foxMessage.textContent = foxMessages[Math.floor(Math.random() * foxMessages.length)];
+                    completePopup.classList.add('show');
+                    spawnConfetti(25);
 
-        function showWrongPopup() {
-            const msg = wrongMessages[Math.floor(Math.random() * wrongMessages.length)];
-            document.getElementById('wrong-popup-emoji').textContent = msg.emoji;
-            document.getElementById('wrong-popup-text').textContent = msg.text;
-            document.getElementById('wrong-popup-subtext').textContent = msg.sub;
-            
-            const p = currentProblem;
-            
-            // Build left mini rectangle
-            const miniLeft = document.getElementById('mini-rect-left');
-            miniLeft.innerHTML = '';
-            miniLeft.style.gridTemplateColumns = `repeat(${p.leftCols}, 1fr)`;
-            for (let i = 0; i < p.rows * p.leftCols; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'mini-cell';
-                miniLeft.appendChild(cell);
-            }
-            
-            // Build right mini rectangle
-            const miniRight = document.getElementById('mini-rect-right');
-            miniRight.innerHTML = '';
-            miniRight.style.gridTemplateColumns = `repeat(${p.rightCols}, 1fr)`;
-            for (let i = 0; i < p.rows * p.rightCols; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'mini-cell';
-                miniRight.appendChild(cell);
-            }
-            
-            // Fill in equations
-            document.getElementById('mini-eq-left').textContent = `${p.rows} × ${p.leftCols}`;
-            document.getElementById('mini-result-left').textContent = p.leftProduct;
-            document.getElementById('mini-eq-right').textContent = `${p.rows} × ${p.rightCols}`;
-            document.getElementById('mini-result-right').textContent = p.rightProduct;
-            document.getElementById('final-answer').textContent = p.totalProduct;
-            
-            document.getElementById('wrong-popup').classList.add('show');
-        }
-
-        function hideWrongPopup(tryAgain = false) {
-            document.getElementById('wrong-popup').classList.remove('show');
-            
-            if (tryAgain) {
-                // Let them try the same problem again
-                canAnswer = true;
-                // Remove wrong class from all choices
-                document.querySelectorAll('.choice.wrong').forEach(el => el.classList.remove('wrong'));
+                    setTimeout(() => {
+                        completePopup.classList.remove('show');
+                        roundsInSet = 0;
+                        loadProblem();
+                    }, 2200);
+                }, 200);
             } else {
                 loadProblem();
             }
         }
 
+        // Wrong answer encouragements (growth mindset)
+        const wrongEncouragements = [
+            { emoji: '🤔', title: 'Not Quite!', sub: "The process is more important than the answer!" },
+            { emoji: '💭', title: 'Almost!', sub: "Mistakes in math are OK!" },
+            { emoji: '🌟', title: 'Keep Trying!', sub: "I can learn anything in math!" },
+            { emoji: '🧩', title: 'Think Again!', sub: "There's always more than one way!" },
+            { emoji: '🦊', title: 'Oopsie!', sub: "Math is hard, but you can do it!" },
+            { emoji: '💪', title: 'So Close!', sub: "If I don't get it first, I try a new way!" }
+        ];
+
+        function showWrongPopup() {
+            const msg = wrongEncouragements[Math.floor(Math.random() * wrongEncouragements.length)];
+            document.getElementById('wrong-popup-emoji').textContent = msg.emoji;
+            document.getElementById('wrong-popup-text').textContent = msg.title;
+            document.getElementById('wrong-popup-subtext').textContent = msg.sub;
+            
+            // Reset the correct answer area
+            document.getElementById('correct-answer-area').style.display = 'none';
+            
+            document.getElementById('wrong-popup').classList.add('show');
+        }
+
+        function hideWrongPopup() {
+            document.getElementById('wrong-popup').classList.remove('show');
+            // Let them try the same problem again
+            canAnswer = true;
+            // Remove wrong class from all choices
+            document.querySelectorAll('.choice.wrong').forEach(el => el.classList.remove('wrong'));
+        }
+
+        function showAnswer() {
+            // Show the correct answer area
+            const answerArea = document.getElementById('correct-answer-area');
+            document.getElementById('correct-answer-display').textContent = currentProblem.totalProduct;
+            answerArea.style.display = 'block';
+            
+            // Change buttons - hide Show Answer, change Try Again to Next
+            document.getElementById('show-answer-btn').style.display = 'none';
+            document.getElementById('try-again-btn').textContent = 'Next →';
+            document.getElementById('try-again-btn').onclick = function() {
+                document.getElementById('wrong-popup').classList.remove('show');
+                document.getElementById('show-answer-btn').style.display = 'inline-block';
+                document.getElementById('try-again-btn').textContent = 'Try Again 🔄';
+                document.getElementById('try-again-btn').onclick = hideWrongPopup;
+                loadProblem();
+            };
+        }
+
         // Wire up popup buttons
         document.getElementById('correct-next-btn').addEventListener('click', hideCorrectPopup);
-        document.getElementById('wrong-next-btn').addEventListener('click', () => hideWrongPopup(false));
-        document.getElementById('tryagain-btn').addEventListener('click', () => hideWrongPopup(true));
+        document.getElementById('streak-continue-btn').addEventListener('click', hideStreakPopup);
+        document.getElementById('try-again-btn').addEventListener('click', hideWrongPopup);
+        document.getElementById('show-answer-btn').addEventListener('click', showAnswer);
 
         function updateStats() {
             scoreEl.textContent = score;
@@ -1529,14 +1566,26 @@
             streakDisplay.classList.toggle('hot', streak >= 5);
         }
 
-        function spawnEmoji(emoji) {
-            const el = document.createElement('div');
-            el.className = 'flying-emoji';
-            el.textContent = emoji;
-            el.style.left = (30 + Math.random() * 40) + '%';
-            el.style.top = '50%';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 700);
+        // Spawn emojis that scale with streak level
+        function spawnCorrectEmojis(count, streakLevel) {
+            const emojis = ['⭐', '✨', '💫', '🌟', '💥', '🔥', '💪', '🎯', '🚀', '👑', '💎'];
+            
+            let sizeClass = '';
+            if (streakLevel >= 10) sizeClass = 'streak-ultra';
+            else if (streakLevel >= 6) sizeClass = 'streak-high';
+            else if (streakLevel >= 3) sizeClass = 'streak-mid';
+            
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    const emoji = document.createElement('div');
+                    emoji.className = 'flying-emoji-correct' + (sizeClass ? ' ' + sizeClass : '');
+                    emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    emoji.style.left = (10 + Math.random() * 80) + '%';
+                    emoji.style.top = (50 + Math.random() * 30) + '%';
+                    document.body.appendChild(emoji);
+                    setTimeout(() => emoji.remove(), 1200);
+                }, i * 50);
+            }
         }
 
         function spawnConfetti(count) {
